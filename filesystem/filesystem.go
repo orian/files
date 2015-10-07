@@ -33,9 +33,17 @@ func (f *FilesystemStore) Create(name string) (io.WriteCloser, error) {
 }
 
 func (f *FilesystemStore) Get(name string) (io.ReadCloser, error) {
-	return os.Open(path.Join(f.Dir, name))
+	r, err := os.Open(path.Join(f.Dir, name))
+	if os.IsNotExist(err) {
+		return nil, files.ErrNotFound
+	}
+	return r, err
 }
 
 func (f *FilesystemStore) Delete(name string) error {
-	return os.Remove(path.Join(f.Dir, name))
+	err := os.Remove(path.Join(f.Dir, name))
+	if os.IsNotExist(err) {
+		return files.ErrNotFound
+	}
+	return err
 }

@@ -8,7 +8,7 @@ import (
 	"io"
 )
 
-var _ files.FileStore = NewApi("a", nil)
+var _ files.FileStore = NewApi("", nil)
 
 type AppengineStoreConfig struct {
 	Bucket string
@@ -33,9 +33,18 @@ func (a *AppengineStore) Create(name string) (io.WriteCloser, error) {
 }
 
 func (a *AppengineStore) Get(name string) (io.ReadCloser, error) {
-	return nil, nil
+	r, err := storage.NewReader(a.Ctx, a.Cfg.Bucket, name)
+	if err == storage.ErrObjectNotExist || err == storage.ErrBucketNotExist {
+		// TODO log an error
+		return nil, files.ErrNotFound
+	}
+	return r, err
 }
 
 func (a *AppengineStore) Delete(name string) error {
-	return nil
+	err := storage.DeleteObject(a.Ctx, a.Cfg.Bucket, name)
+	if err == storage.ErrObjectNotExist || err == storage.ErrBucketNotExist {
+		return files.ErrNotFound
+	}
+	return err
 }

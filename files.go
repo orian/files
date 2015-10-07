@@ -4,7 +4,12 @@
 package files
 
 import (
+	"fmt"
 	"io"
+)
+
+var (
+	ErrNotFound = fmt.Errorf("not found")
 )
 
 type FileStore interface {
