@@ -2,6 +2,7 @@ package filesystem
 
 import (
 	"github.com/orian/files"
+	"golang.org/x/net/context"
 
 	"io"
 	"os"
@@ -9,6 +10,7 @@ import (
 )
 
 var _ files.FileStore = &FilesystemStore{}
+var _ files.Generator = &FilesystemStore{}
 
 type writer struct {
 	f     *os.File
@@ -26,6 +28,10 @@ func (w *writer) Close() error {
 
 type FilesystemStore struct {
 	Dir string
+}
+
+func (f *FilesystemStore) Generate(ctx context.Context) files.FileStore {
+	return f
 }
 
 func (f *FilesystemStore) Create(name string) (io.WriteCloser, error) {

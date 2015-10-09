@@ -9,12 +9,13 @@ import (
 )
 
 var _ files.FileStore = NewApi("", nil)
+var _ files.Generator = &AppengineStoreConfig{}
 
 type AppengineStoreConfig struct {
 	Bucket string
 }
 
-func (cfg *AppengineStoreConfig) Api(c context.Context) *AppengineStore {
+func (cfg *AppengineStoreConfig) Generate(c context.Context) files.FileStore {
 	return &AppengineStore{cfg, c}
 }
 

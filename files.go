@@ -4,6 +4,8 @@
 package files
 
 import (
+	"golang.org/x/net/context"
+
 	"fmt"
 	"io"
 )
@@ -16,4 +18,8 @@ type FileStore interface {
 	Create(string) (io.WriteCloser, error)
 	Get(string) (io.ReadCloser, error)
 	Delete(string) error
+}
+
+type Generator interface {
+	Generate(ctx context.Context) FileStore
 }
