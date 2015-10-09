@@ -3,9 +3,15 @@ package appengine
 import (
 	"github.com/orian/files"
 	"golang.org/x/net/context"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/urlfetch"
+	"google.golang.org/cloud"
 	"google.golang.org/cloud/storage"
 
 	"io"
+	"net/http"
 )
 
 var _ files.FileStore = NewApi("", nil)
@@ -16,7 +22,14 @@ type AppengineStoreConfig struct {
 }
 
 func (cfg *AppengineStoreConfig) Generate(c context.Context) files.FileStore {
-	return &AppengineStore{cfg, c}
+	hc := &http.Client{
+	    Transport: &oauth2.Transport{
+	        Source: google.AppEngineTokenSource(c, storage.ScopeFullControl),
+	        Base:   &urlfetch.Transport{Context: c},
+	    },
+	}
+	ctx := cloud.WithContext(c, appengine.AppID(c), hc)
+	return &AppengineStore{cfg, ctx}
 }
 
 func NewApi(bucket string, c context.Context) *AppengineStore {
